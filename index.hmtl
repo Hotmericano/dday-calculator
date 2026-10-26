@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공군 전역일 계산기</title>
+</head>
+<body>
+  <h1>공군 전역일 계산기</h1>
+
+  <label>입대일 <input type="date" id="start"></label>
+  <button id="calc">계산</button>
+
+  <p id="end-date"></p>
+  <p id="dday"></p>
+
+  <script src="main.js"></script>
+</body>
+</html>

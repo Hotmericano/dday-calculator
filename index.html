@@ -4,51 +4,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>공군 전역일 계산기</title>
-  <style>
-    /* 계급 목록 */
-    .rank-list { list-style: none; padding: 0; max-width: 360px; }
-    .rank-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px 0;
-      border-bottom: 1px solid #ddd;
-    }
-    .rank-item.done { color: #888; }
-    .rank-item.current { font-weight: bold; }
-    .rank-name { width: 3em; }
-    .rank-date { flex: 1; }
-
-    /* 약장: 계급 수만큼 가로 막대를 쌓는다 (이병 1개 ~ 병장 4개) */
-    .insignia {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 3px;
-      width: 28px;
-      height: 32px;
-      padding: 0 4px;
-      background: #1f2a44;
-      border-radius: 3px;
-    }
-    .insignia .bar {
-      height: 4px;
-      background: #f2f2f2;
-      border-radius: 1px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>공군 전역일 계산기</h1>
+  <main class="container">
+    <header class="header">
+      <h1>공군 전역일 계산기</h1>
+      <p class="subtitle">입대일을 고르면 바로 계산돼요</p>
+    </header>
 
-  <label>입대일 <input type="date" id="start"></label>
-  <button id="calc">계산</button>
+    <section class="card input-card">
+      <label for="start">입대일</label>
+      <input type="date" id="start">
+    </section>
 
-  <p id="end-date"></p>
-  <p id="dday"></p>
+    <p id="message" class="message"></p>
 
-  <h2 id="rank-title"></h2>
-  <ul id="ranks" class="rank-list"></ul>
+    <div id="result" class="result" hidden>
+      <!-- 전역일 & 전체 복무 진행률 -->
+      <section class="card summary-card">
+        <p class="label">전역까지</p>
+        <p id="dday" class="dday"></p>
+        <p id="end-date" class="end-date"></p>
+
+        <div class="progress">
+          <div id="total-bar" class="progress-bar"></div>
+        </div>
+        <div class="progress-info">
+          <span id="total-percent"></span>
+          <span id="total-days"></span>
+        </div>
+      </section>
+
+      <!-- 계급별 진급일 & 진행률 -->
+      <section class="card">
+        <h2 id="rank-title" class="rank-title"></h2>
+        <ul id="ranks" class="rank-list"></ul>
+      </section>
+    </div>
+  </main>
 
   <script src="main.js"></script>
 </body>

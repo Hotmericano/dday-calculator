@@ -1,0 +1,165 @@
+/* ===== 색상 (공군 남색 + 하늘색) ===== */
+:root {
+  color-scheme: light dark; /* 달력 아이콘 등 브라우저 기본 요소도 다크 모드에 맞춤 */
+  --bg: #eef3f9;
+  --card: #ffffff;
+  --text: #1c2433;
+  --muted: #6b7686;
+  --line: #e3e8ef;
+  --navy: #1f2a44;
+  --sky: #3a8dde;
+  --track: #e3ebf5;
+}
+
+/* 휴대폰/PC가 다크 모드면 어두운 색으로 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #10151f;
+    --card: #1a2130;
+    --text: #e8ecf2;
+    --muted: #97a1b2;
+    --line: #2a3344;
+    --navy: #0c1220;
+    --sky: #5aa6ef;
+    --track: #2a3344;
+  }
+}
+
+/* ===== 기본 ===== */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Malgun Gothic", "Noto Sans KR", sans-serif;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.header h1 { margin: 0; font-size: 24px; }
+.subtitle { margin: 4px 0 20px; color: var(--muted); font-size: 14px; }
+
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ===== 입력 ===== */
+.input-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.input-card label { font-weight: 600; }
+.input-card input {
+  font: inherit;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+}
+
+.message { color: var(--muted); text-align: center; }
+.message:empty { display: none; }
+
+/* ===== 전역 요약 ===== */
+.summary-card { text-align: center; }
+.label { margin: 0; color: var(--muted); font-size: 14px; }
+.dday {
+  margin: 4px 0;
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--sky);
+  font-variant-numeric: tabular-nums;
+}
+.end-date { margin: 0 0 20px; color: var(--muted); }
+
+/* ===== 진행률 바 ===== */
+.progress {
+  height: 12px;
+  background: var(--track);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress.small { height: 6px; }
+
+.progress-bar {
+  width: 0;
+  height: 100%;
+  background: var(--sky);
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== 계급 목록 ===== */
+.rank-title { margin: 0 0 8px; font-size: 18px; }
+.rank-list { list-style: none; margin: 0; padding: 0; }
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.rank-item:last-child { border-bottom: none; }
+
+.rank-body { flex: 1; }
+.rank-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.rank-name { font-weight: 700; }
+.rank-date { color: var(--muted); font-size: 13px; }
+.rank-status {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.rank-item.done .rank-name { color: var(--muted); }
+.rank-item.current .rank-name { color: var(--sky); }
+.rank-item.upcoming .insignia { opacity: 0.35; }
+
+/* ===== 약장: 계급 수만큼 가로 막대를 쌓는다 ===== */
+.insignia {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  flex-shrink: 0;
+  width: 32px;
+  height: 36px;
+  padding: 0 5px;
+  background: var(--navy);
+  border-radius: 4px;
+}
+.insignia .bar {
+  height: 4px;
+  background: #f2f2f2;
+  border-radius: 1px;
+}

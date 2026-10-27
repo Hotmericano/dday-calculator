@@ -19,6 +19,16 @@ function parseDate(value) {
   return new Date(y, m - 1, d);
 }
 
+// 날짜에 일수 더하기
+function addDays(date, days) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+}
+
+// 두 날짜 사이의 일수 (b - a)
+function daysBetween(a, b) {
+  return Math.round((b - a) / DAY_MS);
+}
+
 // 전역일 계산 (민법의 기간 계산 방식)
 // - 입대일에 복무 개월 수를 더한 달에서, 입대일과 같은 날의 "전날"이 전역일
 // - 그 달에 같은 날이 없으면(예: 31일 입대 → 2월) 그 달의 마지막 날이 전역일
@@ -44,16 +54,23 @@ function calcPromotionBase(start) {
 }
 
 // 계급별 진급일 목록 만들기
-// 이병은 진급이 아니라 입대일부터 시작이므로 입대일을 그대로 쓴다.
-function calcPromotions(start) {
+// - date: 그 계급이 되는 날 (이병은 입대일)
+// - until: 그 계급이 끝나는 날 = 다음 진급일 (병장은 전역 다음 날)
+function calcPromotions(start, endDate) {
   const base = calcPromotionBase(start);
-  return RANKS.map((rank) => ({
+  const promotions = RANKS.map((rank) => ({
     ...rank,
     date:
       rank.months === 0
         ? start
         : new Date(base.getFullYear(), base.getMonth() + rank.months, 1),
   }));
+
+  promotions.forEach((p, i) => {
+    const next = promotions[i + 1];
+    p.until = next ? next.date : addDays(endDate, 1);
+  });
+  return promotions;
 }
 
 // 오늘 기준 현재 계급 찾기 (진급일이 오늘 이전인 계급 중 가장 높은 것)
@@ -63,6 +80,15 @@ function findCurrentRankIndex(promotions, today) {
     if (p.date <= today) current = i;
   });
   return current;
+}
+
+// 기간 [from, until) 중 오늘까지 지난 비율 (0 ~ 100)
+// - 입대일 당일을 1일차로 센다.
+function calcProgress(from, until, today) {
+  const total = daysBetween(from, until);
+  const passed = daysBetween(from, today) + 1;
+  const percent = (passed / total) * 100;
+  return Math.min(100, Math.max(0, percent));
 }
 
 // 날짜를 "2027-10-04 (월)" 형태로 표시
@@ -76,7 +102,7 @@ function formatDate(date) {
 
 // 남은 일수를 "D-123", "D-Day", "D+5" 형태로 표시
 function formatDday(endDate, today) {
-  const diff = Math.round((endDate - today) / DAY_MS);
+  const diff = daysBetween(today, endDate);
   if (diff > 0) return `D-${diff}`;
   if (diff === 0) return "D-Day";
   return `D+${-diff}`;
@@ -94,7 +120,31 @@ function createInsignia(bars) {
   return insignia;
 }
 
-// 계급 목록 화면에 그리기
+// 진행률 바 요소 만들기
+function createProgressBar(percent) {
+  const track = document.createElement("div");
+  track.className = "progress small";
+  const bar = document.createElement("div");
+  bar.className = "progress-bar";
+  bar.style.width = `${percent}%`;
+  track.appendChild(bar);
+  return track;
+}
+
+// 전체 복무 요약 그리기
+function renderSummary(start, endDate, today) {
+  const totalDays = daysBetween(start, endDate) + 1;
+  const passed = Math.min(totalDays, Math.max(0, daysBetween(start, today) + 1));
+  const percent = calcProgress(start, addDays(endDate, 1), today);
+
+  document.getElementById("dday").textContent = formatDday(endDate, today);
+  document.getElementById("end-date").textContent = `전역일 ${formatDate(endDate)}`;
+  document.getElementById("total-bar").style.width = `${percent}%`;
+  document.getElementById("total-percent").textContent = `${percent.toFixed(1)}%`;
+  document.getElementById("total-days").textContent = `${passed} / ${totalDays}일`;
+}
+
+// 계급 목록 그리기
 function renderRanks(promotions, currentIndex, endDate, today) {
   const titleEl = document.getElementById("rank-title");
   const listEl = document.getElementById("ranks");
@@ -103,7 +153,7 @@ function renderRanks(promotions, currentIndex, endDate, today) {
   if (currentIndex === -1) {
     titleEl.textContent = "아직 입대 전이에요";
   } else if (endDate < today) {
-    titleEl.textContent = "전역을 축하합니다!";
+    titleEl.textContent = "전역을 축하합니다! 🎉";
   } else {
     titleEl.textContent = `현재 계급: ${promotions[currentIndex].name}`;
   }
@@ -111,48 +161,67 @@ function renderRanks(promotions, currentIndex, endDate, today) {
   promotions.forEach((p, i) => {
     const item = document.createElement("li");
     item.className = "rank-item";
-    if (i < currentIndex) item.classList.add("done");
-    if (i === currentIndex) item.classList.add("current");
+    if (p.until <= today) item.classList.add("done");
+    else if (p.date <= today) item.classList.add("current");
+    else item.classList.add("upcoming");
 
+    // 이름 + 진급일
+    const head = document.createElement("div");
+    head.className = "rank-head";
     const name = document.createElement("span");
     name.className = "rank-name";
     name.textContent = p.name;
-
     const date = document.createElement("span");
     date.className = "rank-date";
     date.textContent = formatDate(p.date);
+    head.append(name, date);
 
-    const dday = document.createElement("span");
-    dday.textContent = p.date > today ? formatDday(p.date, today) : "";
+    // 상태 문구
+    const percent = calcProgress(p.date, p.until, today);
+    const status = document.createElement("div");
+    status.className = "rank-status";
+    if (p.until <= today) {
+      status.textContent = "완료";
+    } else if (p.date <= today) {
+      const next = i < promotions.length - 1 ? "다음 진급" : "전역";
+      status.textContent = `${percent.toFixed(1)}% · ${next}까지 ${daysBetween(today, p.until)}일`;
+    } else {
+      status.textContent = formatDday(p.date, today);
+    }
 
-    item.append(createInsignia(p.bars), name, date, dday);
+    const body = document.createElement("div");
+    body.className = "rank-body";
+    body.append(head, createProgressBar(percent), status);
+
+    item.append(createInsignia(p.bars), body);
     listEl.appendChild(item);
   });
 }
 
-document.getElementById("calc").addEventListener("click", () => {
+// 입력값이 바뀔 때마다 다시 계산
+function update() {
   const input = document.getElementById("start").value;
-  const endDateEl = document.getElementById("end-date");
-  const ddayEl = document.getElementById("dday");
+  const messageEl = document.getElementById("message");
+  const resultEl = document.getElementById("result");
 
   if (!input) {
-    endDateEl.textContent = "입대일을 입력해주세요.";
-    ddayEl.textContent = "";
-    document.getElementById("rank-title").textContent = "";
-    document.getElementById("ranks").innerHTML = "";
+    messageEl.textContent = "입대일을 선택해주세요.";
+    resultEl.hidden = true;
     return;
   }
 
   const start = parseDate(input);
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
   const endDate = calcEndDate(start, SERVICE_MONTHS);
-
-  endDateEl.textContent = `전역일: ${formatDate(endDate)}`;
-  ddayEl.textContent = formatDday(endDate, today);
-
-  const promotions = calcPromotions(start);
+  const promotions = calcPromotions(start, endDate);
   const currentIndex = findCurrentRankIndex(promotions, today);
+
+  messageEl.textContent = "";
+  resultEl.hidden = false;
+  renderSummary(start, endDate, today);
   renderRanks(promotions, currentIndex, endDate, today);
-});
+}
+
+document.getElementById("start").addEventListener("change", update);
+update();

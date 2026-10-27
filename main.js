@@ -40,14 +40,6 @@ function formatDday(endDate, today) {
 }
 
 document.getElementById("calc").addEventListener("click", () => {
-<<<<<<< HEAD
-  const start = new Date(document.getElementById("start").value);
-  const today = new Date();
-  const end-date =  
-  // TODO 1: 입대일에 SERVICE_MONTHS 개월을 더해서 전역일 구하기
-  // TODO 2: 전역일을 "전역일: 2028-07-25" 형태로 end-date에 표시
-  // TODO 3: 오늘부터 전역일까지 남은 일수를 구해서 "D-123" 형태로 dday에 표시
-=======
   const input = document.getElementById("start").value;
   const endDateEl = document.getElementById("end-date");
   const ddayEl = document.getElementById("dday");
@@ -66,5 +58,4 @@ document.getElementById("calc").addEventListener("click", () => {
 
   endDateEl.textContent = `전역일: ${formatDate(endDate)}`;
   ddayEl.textContent = formatDday(endDate, today);
->>>>>>> ccf050f37641d1a9411847d658dcd5e32060bb59
 });

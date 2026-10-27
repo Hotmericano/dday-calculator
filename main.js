@@ -223,5 +223,36 @@ function update() {
   renderRanks(promotions, currentIndex, endDate, today);
 }
 
-document.getElementById("start").addEventListener("change", update);
+// ===== 입대일 기억하기 =====
+// localStorage: 브라우저에 작은 데이터를 저장해두는 공간 (새로고침하거나 다시 열어도 유지됨)
+// 시크릿 모드 등에서는 저장이 막힐 수 있어서 try/catch로 감싼다.
+const STORAGE_KEY = "dday-calculator:start";
+
+function saveStartDate(value) {
+  try {
+    if (value) localStorage.setItem(STORAGE_KEY, value);
+    else localStorage.removeItem(STORAGE_KEY);
+  } catch (e) {
+    // 저장이 안 되면 그냥 넘어간다 (계산은 정상 동작)
+  }
+}
+
+function loadStartDate() {
+  try {
+    return localStorage.getItem(STORAGE_KEY) || "";
+  } catch (e) {
+    return "";
+  }
+}
+
+const startInput = document.getElementById("start");
+
+// 날짜를 바꾸면 저장하고 다시 계산
+startInput.addEventListener("change", () => {
+  saveStartDate(startInput.value);
+  update();
+});
+
+// 페이지를 열 때 저장된 입대일이 있으면 불러와서 바로 계산
+startInput.value = loadStartDate();
 update();

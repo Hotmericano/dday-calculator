@@ -32,10 +32,13 @@
 - GitHub Pages 배포
 
 ## 파일 구조
+
+```
 dday-calculator/
-├── index.html # 화면 구조
-├── style.css # 디자인 (라이트/다크 모드)
-└── main.js # 날짜 계산, 화면 그리기, 입대일 저장
+├── index.html   # 화면 구조
+├── style.css    # 디자인 (라이트/다크 모드)
+└── main.js      # 날짜 계산, 화면 그리기, 입대일 저장
+```
 
 ## 개발 과정
 

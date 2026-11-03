@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>공군 전역일 계산기</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=1.2">
 </head>
 <body>
   <main class="container">
@@ -44,6 +44,9 @@
     </div>
   </main>
 
-  <script src="main.js"></script>
+  <!-- dday.js(계산)를 먼저 불러와야 main.js(화면)에서 쓸 수 있다 -->
+  <!-- ?v=버전: 배포 후 브라우저가 예전 파일을 캐시에서 꺼내 쓰지 않도록 -->
+  <script src="dday.js?v=1.2"></script>
+  <script src="main.js?v=1.2"></script>
 </body>
-</html>
+</html>
